@@ -129,7 +129,7 @@ class Generator
 		}
 	}
 	
-	protected function question($y, $num, $text, $class = null, $inverted = false) {
+	protected function question($y, $num, $text, $class, $inverted = false) {
 		$this->pdf->setCellHeightRatio(2);
 		if ($inverted) {
 			$this->pdf->SetTextColor(0,0,0,0);	
@@ -149,25 +149,18 @@ class Generator
 		$this->pdf->SetFillColor(0,0,0,0);
 
 		// class
-		if (!is_null($class)) {
-			if ($inverted) {
-				$this->pdf->SetTextColor(0,0,0,0);
-			} else {
-				$this->pdf->setCellHeightRatio(1.8);
-				$this->pdf->SetFont('proximanovaxb', '', 7);
-				$this->pdf->writeHTMLCell(10, 5, 101.5, $y+.2, '['.$class.']', 0, 0, true, true, 'R');	
-			}
-		}
-		
-		
-		// question
 		if ($inverted) {
 			$this->pdf->SetTextColor(0,0,0,0);
+		} else {
+			$this->pdf->setCellHeightRatio(1.8);
+			$this->pdf->SetFont('proximanovaxb', '', 7);
+			$this->pdf->writeHTMLCell(10, 5, 101.5, $y+.2, '['.$class.']', 0, 0, true, true, 'R');	
 		}
-		 
+		
+		// question
 		$this->pdf->setCellHeightRatio(1.2);
 		$this->pdf->SetFont('proximanovarg', '', 8);
-		$this->pdf->writeHTMLCell($inverted || is_null($class) ? 90 : 80, 5, 22.5, $y+.8, $this->improveTypography($text), 0, 1, true, false, 'L');
+		$this->pdf->writeHTMLCell($inverted ? 90 : 80, 5, 22.5, $y+.8, $this->improveTypography($text), 0, 1, true, false, 'L');
 		
 		return $this->pdf->getY();
 	}
@@ -210,13 +203,11 @@ class Generator
 	#     #   #   #   #  #    # #    #   #   #    # #   #  #
 	 #####    #   #    #  ####   ####    #    ####  #    # ######
 	
-	protected function addCard(
-		$width = 128, $height = 103, 
-		$tplPage = 1, $tplX = 0, $tplY = 0
-	) {
-		$tpl = $this->pdf->importPage($tplPage, "TrimBox");
+	protected function addCard($width = 128, $height = 103)
+	{
+		$tpl = $this->pdf->importPage(1, "TrimBox");
 		$this->pdf->AddPage("L", array($width, $height));
-		$this->pdf->useTemplate($tpl, $tplX, $tplY);
+		$this->pdf->useTemplate($tpl, 0, 0);
 		$this->drawCropmarks($width, $height, 11.5);
 	}
 	
@@ -228,9 +219,9 @@ class Generator
 		$this->pdf->cropMark($width-$size,$height-$size,$size,$size,'BR');
 	}
 	
-	protected function prepQuestionCard($packClass, $tplX = 8.5, $tplY = 8)
+	protected function prepQuestionCard()
 	{
-		$this->addCard(128, 103, $packClass, $tplX, $tplY);
+		$this->addCard();
 		//bg
 		$this->pdf->Rect(7, 7, 114, 79.5, 'F', array(), array(0,0,0,0)); 
 		//flag
@@ -240,9 +231,9 @@ class Generator
 			array('width' => .4, 'cap' => 'butt', 'color' => array(0,0,0,100)));
 	}
 	
-	protected function prepAnswerCard($packClass)
+	protected function prepAnswerCard()
 	{
-		$this->addCard(128, 103, $packClass, 8.5, 8);
+		$this->addCard();
 		//bg
 		$this->pdf->Rect(7, 7, 114, 79.5, 'F', array(), array(0,0,0,100));
 		//line
@@ -334,7 +325,7 @@ class MilestonesGenerator extends Generator
 		if ($this->handOverUrl) {
 			$this->processHandOver(func_get_args());
 		}
-		$this->init('./tpl/MemexBlankTemplate.pdf');	
+		$this->init('./MemexBlankTemplate.pdf');	
 		foreach ($milestones as $milestone) {
 			$this->renderCard($milestone);
 		}
@@ -381,13 +372,10 @@ class MilestonesGenerator extends Generator
 		$this->pdf->writeHTMLCell(73.5, 5, 15, 13.8, "Milníky", 0, 0, false, true, 'R');
 		
 		$this->pdf->SetFont('proximanovabl', '', 11);
-		$this->pdf->writeHTMLCell(100, 50, 17, 24, $milestone->short, 0, 0, false, true, 'L');
+		$this->pdf->writeHTMLCell(100, 50, 17, 26, $milestone->short, 0, 0, false, true, 'L');
 		
 		$this->pdf->SetFont('proximanovarg', '', 8);
-		$height = $this->pdf->getCellHeightRatio();
-		$this->pdf->setCellHeightRatio($height * .8);
-		$this->pdf->writeHTMLCell(70, 50, 17, 31, $milestone->long, 0, 0, false, true, 'L');
-		$this->pdf->setCellHeightRatio($height);
+		$this->pdf->writeHTMLCell(100, 50, 17, 31, $milestone->long, 0, 0, false, true, 'L');
 	}
 }
 
@@ -398,13 +386,10 @@ class TheoriesGenerator extends Generator
 		if ($this->handOverUrl) {
 			$this->processHandOver(func_get_args());
 		}
-		$this->init('./tpl/bgs.pdf');
-		
-		$this->renderDividerCard();
-		
+		$this->init('./MemexBlankTemplate.pdf');
 		foreach ($theories as $theory) {
 			// front
-			$this->prepQuestionCard(20);
+			$this->prepQuestionCard();
 			$this->title("▼", "Teorie");
 			$this->largeTitle($theory->name);
 			
@@ -421,39 +406,9 @@ class TheoriesGenerator extends Generator
 		
 	}
 	
-	private function renderDividerCard() {
-		$this->addCard(128, 103, 20, 8.5, 8);	
-		$this->catTitle("▼", "Teorie");
-	}
-	
-	protected function catTitle($class, $text) {
-		$this->pdf->setCellHeightRatio(2);
-		$this->pdf->setCellPadding(0);
-		
-		$this->pdf->Rect(15, 15, 7.5, 7.5, 'F', array(), array(0,0,0,0));
-		
-		$this->pdf->SetFont('proximanovabl', '', 11);
-		$this->pdf->SetTextColor(0,0,0,100);
-		$this->pdf->writeHTMLCell(7.5, 7.5, 15, 15, $class, 0, 0, false, true, 'C');
-		
-		$this->pdf->startTransaction(); 
-		$start_x = $this->pdf->GetX(); 
-		$this->pdf->write(50, $text);
-		$width = ($this->pdf->GetX() - $start_x);
-		$this->pdf = $this->pdf->rollbackTransaction();
-		
-		$this->pdf->Rect(23+3, 15, $width+4, 7.5, 'F', array(), array(0,0,0,0));
-		
-		$this->pdf->setCellHeightRatio(1);
-		$this->pdf->SetFont('proximanovarg', 'b', 11);
-		$this->pdf->SetTextColor(0,0,0,100);
-		$this->pdf->writeHTMLCell(100, 50, 24.1+4, 17, $text, 0, 0, false, true, 'L');
-	}
-	
-	
 	private function prepTheoryCard()
 	{
-		$this->addCard(128, 103, 20, 8.5, 8);
+		$this->addCard();
 		//bg
 		$this->pdf->Rect(7, 7, 114, 87, 'F', array(), array(0,0,0,100));
 		//line
@@ -469,49 +424,17 @@ class FiguresGenerator extends Generator
 		if ($this->handOverUrl) {
 			$this->processHandOver(func_get_args());
 		}
-		$this->init('./tpl/bgs.pdf');
-		
-		$this->renderDividerCard();
-		
+		$this->init('./MemexBlankTemplate.pdf');
 		foreach ($figures as $figure) {
 			$this->renderCard($figure);
 		}
 		$this->close('figures');
 	}
 	
-	private function renderDividerCard() {
-		$this->addCard(128, 103, 19, 8.5, 8);	
-		$this->catTitle("●", "Osobnosti");
-	}
-	
-	protected function catTitle($class, $text) {
-		$this->pdf->setCellHeightRatio(2);
-		$this->pdf->setCellPadding(0);
-		
-		$this->pdf->Rect(15, 15, 7.5, 7.5, 'F', array(), array(0,0,0,0));
-		
-		$this->pdf->SetFont('proximanovabl', '', 11);
-		$this->pdf->SetTextColor(0,0,0,100);
-		$this->pdf->writeHTMLCell(7.5, 7.5, 15, 15, $class, 0, 0, false, true, 'C');
-		
-		$this->pdf->startTransaction(); 
-		$start_x = $this->pdf->GetX(); 
-		$this->pdf->write(50, $text);
-		$width = ($this->pdf->GetX() - $start_x);
-		$this->pdf = $this->pdf->rollbackTransaction();
-		
-		$this->pdf->Rect(23+3, 15, $width+4, 7.5, 'F', array(), array(0,0,0,0));
-		
-		$this->pdf->setCellHeightRatio(1);
-		$this->pdf->SetFont('proximanovarg', 'b', 11);
-		$this->pdf->SetTextColor(0,0,0,100);
-		$this->pdf->writeHTMLCell(100, 50, 24.1+4, 17, $text, 0, 0, false, true, 'L');
-	}
-	
 	public function renderCard($figure) 
 	{
 		// front
-		$this->prepQuestionCard(19);
+		$this->prepQuestionCard();
 		
 		$this->title("●", "Osobnosti");
 		$this->largeTitle($figure->name);
@@ -529,7 +452,7 @@ class FiguresGenerator extends Generator
 	
 	protected function prepFigureInfoCard($born, $deceased)
 	{
-		$this->addCard(128, 103, 19, 8.5, 8);
+		$this->addCard();
 		$this->pdf->SetMargins(29, 30, 15, 30);
 		//bg
 		$this->pdf->Rect(7, 7, 114, 87, 'F', array(), array(0,0,0,100));
@@ -558,101 +481,21 @@ class PackGenerator extends Generator
 		if ($this->handOverUrl) {
 			$this->processHandOver(func_get_args());
 		}
-		$this->init('./tpl/bgs.pdf');
+		$this->init('./MemexSetTemplate.pdf');
 		
 		$shuffled = array_chunk($pack->getShuffledQuestions(), 5);
-		
-		
-		$this->generateDividerCard($pack);
-		$this->generateActivitiesCard($pack);
-		$this->generateLiteratureCard($pack);
+		// $this->generateDividerCard($pack);
 		$this->generateOpenQuestionsCard($pack);
-		
 		foreach ($shuffled as $chunk) {
 			$this->generateClosedQuestionsCard($pack, $chunk);
 		}
 		$this->close('memex');
-		
-	}
-	
-	private function generateDividerCard($pack)
-	{
-		$this->addCard(128, 103, $pack->class, 8.5, 8);	
-		$this->catTitle($pack->class, $pack->name);
-	}
-	
-	protected function catTitle($class, $text) {
-		$this->pdf->setCellHeightRatio(2);
-		$this->pdf->setCellPadding(0);
-		
-		$this->pdf->Rect(15, 15, 7.5, 7.5, 'F', array(), array(0,0,0,100));
-		
-		$this->pdf->SetFont('proximanovabl', '', 11);
-		$this->pdf->SetTextColor(0,0,0,0);
-		$this->pdf->writeHTMLCell(7.5, 7.5, 15, 15, $class, 0, 0, false, true, 'C');
-		
-		$this->pdf->startTransaction(); 
-		$start_x = $this->pdf->GetX(); 
-		$this->pdf->write(50, $text);
-		$width = ($this->pdf->GetX() - $start_x);
-		$this->pdf = $this->pdf->rollbackTransaction();
-		
-		$this->pdf->Rect(23+3, 15, $width+2, 7.5, 'F', array(), array(0,0,0,100));
-		
-		$this->pdf->setCellHeightRatio(1);
-		$this->pdf->SetFont('proximanovarg', 'b', 11);
-		$this->pdf->SetTextColor(0,0,0,0);
-		$this->pdf->writeHTMLCell(100, 50, 24.1+4, 17, $text, 0, 0, false, true, 'L');
-	}
-	
-	private function generateActivitiesCard($pack)
-	{
-		$this->prepQuestionCard($pack->class);
-		
-		$this->title('#', 'Vzdělávací výzvy');
-		
-		$y = 26.8;
-		
-		foreach ($pack->activities as $i => $activity) {
-			$y = $this->question($y, $i+1, '<b></b>' . $activity);
-			$y += 2.9;
-		}
-	}
-	
-	private function generateLiteratureCard($pack) 
-	{
-		$this->prepAnswerCard($pack->class);
-		
-		$this->litTitle('#', 'Doporučené rozšiřující knihy');
-		
-		$y = 26.8;
-		
-		foreach ($pack->literature as $i => $lit) {
-			$y = $this->question($y, $i+1, '<b></b>' . $lit, null, true);
-			$y += 2.9;
-		}
-	}
-	
-	protected function litTitle($class, $text) {
-		$this->pdf->setCellHeightRatio(2);
-		$this->pdf->setCellPadding(0);
-		
-		$this->pdf->Rect(15, 15, 7.5, 7.5, 'F', array(), array(0,0,0,0));
-		
-		$this->pdf->SetFont('proximanovabl', '', 11);
-		$this->pdf->SetTextColor(0,0,0,100);
-		$this->pdf->writeHTMLCell(7.5, 7.5, 15, 15, $class, 0, 0, false, true, 'C');
-		
-		$this->pdf->setCellHeightRatio(1);
-		$this->pdf->SetFont('proximanovarg', 'b', 11);
-		$this->pdf->SetTextColor(0,0,0,0);
-		$this->pdf->writeHTMLCell(100, 50, 24.1, 17, $text, 0, 0, false, true, 'L');
 	}
 	
 	public function generateClosedQuestionsCard($pack, $questions)
 	{
 		// page 1
-		$this->prepQuestionCard($pack->class);
+		$this->prepQuestionCard();
 		$this->title($pack->class, $pack->name);
 		$y = 26.8;
 		foreach ($questions as $i => $question) {
@@ -661,7 +504,7 @@ class PackGenerator extends Generator
 		}
 		
 		// page 2
-		$this->prepAnswerCard($pack->class);
+		$this->prepAnswerCard();
 		$this->invertedTitle($pack->class, $pack->name);
 		$y = 26.8;
 		foreach ($questions as $i => $question) {
@@ -681,7 +524,7 @@ class PackGenerator extends Generator
 		}
 		$questionCount = count($questions);
 		
-		$this->prepQuestionCard($pack->class);
+		$this->prepQuestionCard();
 		$this->title($pack->class, 'Otevřené otázky /a');
 		$y = 26.8;
 		foreach ($questions as $i => $question) {
@@ -694,7 +537,7 @@ class PackGenerator extends Generator
 			}
 		}	
 		
-		$this->prepQuestionCard($pack->class);
+		$this->prepQuestionCard();
 		$this->title($pack->class, 'Otevřené otázky /b');
 		$y = 26.8;
 		foreach ($questions as $i => $question) {
