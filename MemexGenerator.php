@@ -685,7 +685,7 @@ class PackGenerator extends Generator
 		$this->title($pack->class, 'Otevřené otázky /a');
 		$y = 26.8;
 		foreach ($questions as $i => $question) {
-			$y = $this->question($y, $i+1, '<b></b>' . $question, $pack->class);
+			$y = $this->question($y, $i+1, '<b></b>' . $question, null);
 			$y += 2.9;
 			unset($questions[$i]);
 			
@@ -698,7 +698,7 @@ class PackGenerator extends Generator
 		$this->title($pack->class, 'Otevřené otázky /b');
 		$y = 26.8;
 		foreach ($questions as $i => $question) {
-			$y = $this->question($y, $i+1, '<b></b>' . $question, $pack->class);
+			$y = $this->question($y, $i+1, '<b></b>' . $question, null);
 			$y += $this->questionPadding;
 		}	
 	}
