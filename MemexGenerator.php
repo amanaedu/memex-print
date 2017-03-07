@@ -372,10 +372,13 @@ class MilestonesGenerator extends Generator
 		$this->pdf->writeHTMLCell(73.5, 5, 15, 13.8, "Milníky", 0, 0, false, true, 'R');
 		
 		$this->pdf->SetFont('proximanovabl', '', 11);
-		$this->pdf->writeHTMLCell(100, 50, 17, 26, $milestone->short, 0, 0, false, true, 'L');
+		$this->pdf->writeHTMLCell(100, 50, 17, 24, $milestone->short, 0, 0, false, true, 'L');
 		
 		$this->pdf->SetFont('proximanovarg', '', 8);
-		$this->pdf->writeHTMLCell(100, 50, 17, 31, $milestone->long, 0, 0, false, true, 'L');
+		$height = $this->pdf->getCellHeightRatio();
+		$this->pdf->setCellHeightRatio($height * .8);
+		$this->pdf->writeHTMLCell(70, 50, 17, 31, $milestone->long, 0, 0, false, true, 'L');
+		$this->pdf->setCellHeightRatio($height);
 	}
 }
 
