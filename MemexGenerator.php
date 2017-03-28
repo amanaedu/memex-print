@@ -336,7 +336,7 @@ class MilestonesGenerator extends Generator
 		}
 		$this->init('./tpl/MemexBlankTemplate.pdf');	
 		foreach ($milestones as $milestone) {
-			$this->renderCard($milestone);
+			$this->renderCard((object) $milestone);
 		}
 		$this->close('milestones.pdf');
 	}
@@ -402,20 +402,24 @@ class TheoriesGenerator extends Generator
 		
 		$this->renderDividerCard();
 		
-		foreach ($theories as $theory) {
-			// front
-			$this->prepQuestionCard(20);
-			$this->title("▼", "Teorie");
-			$this->largeTitle($theory->name);
-			
-			// back
-			$this->prepTheoryCard();
-			$this->invertedTitle('', $theory->category);
-			
-			$this->pdf->SetFont('proximanovasb', '', 8);
-			$this->pdf->setCellHeightRatio(1.3);
-			$y = $this->writeBullet($this->removeTags($theory->description), 27);
-			$this->writeBullet($this->removeTags($theory->examples), $y+$this->questionPadding*2, '&#9679;');
+		foreach ($theories as $category) {
+			foreach ($category as $theory) {
+				$theory = (object) $theory;
+				
+				// front
+				$this->prepQuestionCard(20);
+				$this->title("▼", "Teorie");
+				$this->largeTitle($theory->name);
+				
+				// back
+				$this->prepTheoryCard();
+				$this->invertedTitle('', $theory->category);
+				
+				$this->pdf->SetFont('proximanovasb', '', 8);
+				$this->pdf->setCellHeightRatio(1.3);
+				$y = $this->writeBullet($this->removeTags($theory->description), 27);
+				$this->writeBullet($this->removeTags($theory->examples), $y+$this->questionPadding*2, '&#9679;');
+			}
 		}
 		$this->close('theories');
 		
@@ -474,7 +478,7 @@ class FiguresGenerator extends Generator
 		$this->renderDividerCard();
 		
 		foreach ($figures as $figure) {
-			$this->renderCard($figure);
+			$this->renderCard((object) $figure);
 		}
 		$this->close('figures');
 	}
@@ -555,6 +559,8 @@ class PackGenerator extends Generator
 {
 	public function render($pack)
 	{
+		$pack = (object) $pack;
+		
 		if ($this->handOverUrl) {
 			$this->processHandOver(func_get_args());
 		}
@@ -783,9 +789,13 @@ class Pack
 		$this->literature = $literature;
 		
 		foreach ($sets as $src) {
+			$src = (object) $src;
+			
 			$setObj = new Set($src->class, $src->name, $src->open);
 			
 			foreach ($src->closedQuestions as $srcQuestion) {
+				$srcQuestion = (object) $srcQuestion;
+				
 				$qObj = new ClosedQuestion($srcQuestion->question, $srcQuestion->answer);
 				$setObj->addClosedQuestion($qObj);
 			}
