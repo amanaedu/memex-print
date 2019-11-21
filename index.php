@@ -11,13 +11,13 @@ function loadFile($path) {
 }
 
 function loadCatData($index) {
-	$path = '_topics/' . $index . '.md';
+	$path = 'content/topic/' . $index . '.md';
 	$content = explode('---', loadFile($path));
 	return Yaml::parse($content[1]); 
 }
 
 function loadOtherData($name) {
-	$path = '_data/' . $name . '.yml';
+	$path = 'data/' . $name . '.yml';
 	return Yaml::parse(loadFile($path)); 
 }
 
