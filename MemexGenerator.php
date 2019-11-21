@@ -773,18 +773,18 @@ class Pack
 {
 	public $class;
 	public $name;
-	public $guarantorName;
-	public $guarantorUrl;
+	public $guarantorname;
+	public $guarantorurl;
 	public $activities = array();
 	public $literature = array();
 	public $sets = array();
 	
-	public function __construct($class, $name, $guarantorName, $guarantorUrl, $literature, $activities, $sets) 
+	public function __construct($class, $name, $guarantorname, $guarantorurl, $literature, $activities, $sets) 
 	{
 		$this->class = $class;
 		$this->name = $name;
-		$this->guarantorName = $guarantorName;
-		$this->guarantorUrl = $guarantorUrl;
+		$this->guarantorname = $guarantorname;
+		$this->guarantorurl = $guarantorurl;
 		$this->activities = $activities;
 		$this->literature = $literature;
 		
@@ -793,7 +793,7 @@ class Pack
 			
 			$setObj = new Set($src->class, $src->name, $src->open);
 			
-			foreach ($src->closedQuestions as $srcQuestion) {
+			foreach ($src->closed as $srcQuestion) {
 				$srcQuestion = (object) $srcQuestion;
 				
 				$qObj = new ClosedQuestion($srcQuestion->question, $srcQuestion->answer);
@@ -808,7 +808,7 @@ class Pack
 	{
 		$shuffled = array();
 		foreach ($this->sets as $set) {
-			foreach ($set->closedQuestions as $question) {
+			foreach ($set->closed as $question) {
 				$shuffled[] = $question;
 			}
 		}
@@ -831,7 +831,7 @@ class Set
 	public $class;
 	public $name;
 	public $open;
-	public $closedQuestions = array();
+	public $closed = array();
 	
 	public function __construct($class, $name, $open) 
 	{
@@ -843,7 +843,7 @@ class Set
 	public function addClosedQuestion(ClosedQuestion $question) 
 	{
 		$question->class = $this->class;
-		$this->closedQuestions[] = $question;
+		$this->closed[] = $question;
 	}
 }
 

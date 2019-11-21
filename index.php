@@ -62,8 +62,8 @@ switch ($generator) {
 		$pack = new Memex\Pack(
 			$src->class, 
 			$src->name, 
-			$src->guarantorName, 
-			$src->guarantorUrl, 
+			$src->guarantorname, 
+			$src->guarantorurl, 
 			$src->literature, 
 			$src->activities, 
 			$src->sets
